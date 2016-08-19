@@ -1,0 +1,52 @@
+#!/bin/sh
+### config.properties
+### Application Default Configurations
+SERVER_HOST=0.0.0.0
+SERVER_PORT=443
+
+
+SERVICE_NAME=sample-service
+HOME_PATH=/home/apps
+BASE_PATH=$HOME_PATH/$SERVICE_NAME
+PID_PATH=/tmp/$SERVICE_NAME
+
+case $1 in
+    start)
+        echo "Starting $SERVICE_NAME ..."
+        if [ ! -f $PID_PATH ]; then
+            cd $BASE_PATH
+            nohup java -jar *.jar "$*" > /dev/null &
+            echo $! > $PID_PATH
+            echo "$SERVICE_NAME started ..."
+        else
+            echo "$SERVICE_NAME is already running ..."
+        fi
+    ;;
+    stop)
+        if [ -f $PID_PATH ]; then
+            PID=$(cat $PID_PATH)
+            echo "$SERVICE_NAME stopping ..."
+            kill $PID
+            echo "$SERVICE_NAME stopped ..."
+            rm $PID_PATH
+        else
+            echo "$SERVICE_NAME is not running ..."
+        fi
+    ;;
+    restart)
+        if [ -f $PID_PATH ]; then
+            PID=$(cat $PID_PATH)
+            echo "$SERVICE_NAME stopping ..."
+            kill $PID
+            echo "$SERVICE_NAME stopped ..."
+            rm $PID_PATH
+            echo "$SERVICE_NAME starting ..."
+            cd $BASE_PATH
+            nohup java -jar *.jar "$*" > /dev/null &
+            echo $! > $PID_PATH
+            echo "$SERVICE_NAME started ..."
+        else
+            echo "$SERVICE_NAME is not running ..."
+        fi
+    ;;
+esac
